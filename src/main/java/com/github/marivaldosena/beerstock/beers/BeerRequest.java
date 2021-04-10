@@ -23,6 +23,7 @@ public class BeerRequest {
     @Max(100)
     private Integer quantity;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private BeerType type;
 

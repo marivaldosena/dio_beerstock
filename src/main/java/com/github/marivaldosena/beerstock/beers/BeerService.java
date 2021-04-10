@@ -1,9 +1,12 @@
 package com.github.marivaldosena.beerstock.beers;
 
+import com.github.marivaldosena.beerstock.errors.BeerAlreadyRegisteredException;
+import com.github.marivaldosena.beerstock.errors.BeerNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -15,15 +18,16 @@ public class BeerService {
         this.beerRepository = beerRepository;
     }
 
-    public BeerDto createBeer(BeerRequest request) {
+    public BeerDto createBeer(BeerRequest request) throws BeerAlreadyRegisteredException {
+        verifyIfIsAlreadyRegistered(request.getName());
         Beer beer = request.toEntity();
         beerRepository.save(beer);
         return new BeerDto(beer);
     }
 
-    public BeerDto findByName(String name) {
+    public BeerDto findByName(String name) throws BeerNotFoundException {
         Beer foundBeer = beerRepository.findByName(name)
-                .orElseThrow(() -> new RuntimeException("Beer not found"));
+                .orElseThrow(() -> new BeerNotFoundException(name));
         return new BeerDto(foundBeer);
     }
 
@@ -33,15 +37,28 @@ public class BeerService {
                 .collect(Collectors.toList());
     }
 
-    public void deleteById(Long id) {
+    public void deleteById(Long id) throws BeerNotFoundException {
+        verifyIfExists(id);
         beerRepository.deleteById(id);
     }
-
 
     public BeerDto increment(Long id, Integer quantityToIncrement) {
         Beer beer = beerRepository.findById(id).get();
         beer.updateQuantity(quantityToIncrement);
         beerRepository.save(beer);
         return new BeerDto(beer);
+    }
+
+    private void verifyIfIsAlreadyRegistered(String name) throws BeerAlreadyRegisteredException {
+        Optional<Beer> existingBeer = beerRepository.findByName(name);
+
+        if (existingBeer.isPresent()) {
+            throw new BeerAlreadyRegisteredException(name);
+        }
+    }
+
+    private Beer verifyIfExists(Long id) throws BeerNotFoundException {
+        return beerRepository.findById(id)
+                .orElseThrow(() -> new BeerNotFoundException(id));
     }
 }
