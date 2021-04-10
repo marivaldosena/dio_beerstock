@@ -62,4 +62,8 @@ public class Beer {
     public BeerType getType() {
         return type;
     }
+
+    public void updateQuantity(Integer quantityToIncrement) {
+        this.quantity += quantityToIncrement;
+    }
 }

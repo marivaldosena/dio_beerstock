@@ -6,48 +6,41 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/beers")
 public class BeerController {
-    private final BeerRepository beerRepository;
+    private final BeerService beerService;
 
     @Autowired
-    public BeerController(BeerRepository beerRepository) {
-        this.beerRepository = beerRepository;
+    public BeerController(BeerService beerService) {
+        this.beerService = beerService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BeerDto createBeer(@RequestBody @Valid BeerRequest request) {
-        Beer beer = request.toEntity();
-        return new BeerDto(beer);
+        return beerService.createBeer(request);
     }
 
     @GetMapping("/{name}")
     public BeerDto findByName(@PathVariable String name) {
-        Optional<Beer> beer = beerRepository.findByName(name);
-        return new BeerDto(beer.get());
+        return beerService.findByName(name);
     }
 
     @GetMapping
     public List<BeerDto> listBeers() {
-        List<BeerDto> beers = beerRepository.findAll().stream()
-                .map(BeerDto::new)
-                .collect(Collectors.toList());
-        return beers;
+        return beerService.listAll();
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable("id") Long id) {
+        beerService.deleteById(id);
     }
 
     @PatchMapping("/{id}/increment")
-    public BeerDto increment(@PathVariable Long id, @RequestBody BeerRequest request) {
-        Beer beer = request.toEntity();
-        return new BeerDto(beer);
+    public BeerDto increment(@PathVariable Long id, @RequestBody @Valid QuantityDto request) {
+        return beerService.increment(id, request.getQuantity());
     }
 }
