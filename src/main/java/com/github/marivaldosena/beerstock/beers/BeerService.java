@@ -2,6 +2,7 @@ package com.github.marivaldosena.beerstock.beers;
 
 import com.github.marivaldosena.beerstock.errors.BeerAlreadyRegisteredException;
 import com.github.marivaldosena.beerstock.errors.BeerNotFoundException;
+import com.github.marivaldosena.beerstock.errors.BeerStockExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +43,8 @@ public class BeerService {
         beerRepository.deleteById(id);
     }
 
-    public BeerDto increment(Long id, Integer quantityToIncrement) {
-        Beer beer = beerRepository.findById(id).get();
+    public BeerDto increment(Long id, Integer quantityToIncrement) throws BeerNotFoundException, BeerStockExceededException {
+        Beer beer = verifyIfExists(id);
         beer.updateQuantity(quantityToIncrement);
         beerRepository.save(beer);
         return new BeerDto(beer);

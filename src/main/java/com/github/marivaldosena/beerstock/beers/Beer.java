@@ -1,5 +1,7 @@
 package com.github.marivaldosena.beerstock.beers;
 
+import com.github.marivaldosena.beerstock.errors.BeerStockExceededException;
+
 import javax.persistence.*;
 
 @Entity
@@ -63,7 +65,13 @@ public class Beer {
         return type;
     }
 
-    public void updateQuantity(Integer quantityToIncrement) {
-        this.quantity += quantityToIncrement;
+    public void updateQuantity(Integer quantityToIncrement) throws BeerStockExceededException {
+        int newStockValue = this.quantity + quantityToIncrement;
+
+        if (newStockValue > this.getMax()) {
+            throw new BeerStockExceededException(id, quantityToIncrement);
+        }
+
+        this.quantity = newStockValue;
     }
 }

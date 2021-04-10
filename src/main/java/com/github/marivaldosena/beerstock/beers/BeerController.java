@@ -2,6 +2,7 @@ package com.github.marivaldosena.beerstock.beers;
 
 import com.github.marivaldosena.beerstock.errors.BeerAlreadyRegisteredException;
 import com.github.marivaldosena.beerstock.errors.BeerNotFoundException;
+import com.github.marivaldosena.beerstock.errors.BeerStockExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +43,7 @@ public class BeerController {
     }
 
     @PatchMapping("/{id}/increment")
-    public BeerDto increment(@PathVariable Long id, @RequestBody @Valid QuantityDto request) throws BeerNotFoundException {
+    public BeerDto increment(@PathVariable Long id, @RequestBody @Valid QuantityDto request) throws BeerNotFoundException, BeerStockExceededException {
         return beerService.increment(id, request.getQuantity());
     }
 }
